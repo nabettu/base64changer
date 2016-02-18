@@ -1,15 +1,17 @@
 <?php
-header("Access-Control-Allow-Origin: *");
 
-$base64data = base64_encode(file_get_contents($_GET['imgurl']));
-$headerArray = get_headers($_GET['imgurl']);
+header('Access-Control-Allow-Origin: *');
 
-for($i = 0; $i < count($headerArray) ;$i++){
-  if(preg_match("/Content-Type: image/", $headerArray[$i])){
-    $imgType = str_replace("Content-Type: ", "", get_headers($_GET['imgurl'])[$i]);
-  }
-}
-echo 'data:'.$imgType.';base64,'.$base64data;
+$cp = curl_init();
+curl_setopt($cp, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($cp, CURLOPT_URL, $_GET['imgurl']);
+curl_setopt($cp, CURLOPT_TIMEOUT, 60);
+$data = curl_exec($cp);
+curl_close($cp);
+
+$base64data = base64_encode($data);
+$imgType = substr($_GET['imgurl'], strrpos($_GET['imgurl'],".") + 1);
+
+echo 'data:image/'.$imgType.';base64,'.$base64data;
 
 exit();
-?>
